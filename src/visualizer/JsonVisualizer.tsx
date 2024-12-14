@@ -13,6 +13,7 @@ const JsonVisualizer: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [jsonInput, setJsonInput] = useState<string>("");
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -44,6 +45,23 @@ const JsonVisualizer: React.FC = () => {
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+        // Calculate available height by subtracting header height from viewport height
+        const headerElement = containerRef.current.querySelector('.header-section');
+        const headerHeight = headerElement?.getBoundingClientRect().height || 0;
+        const availableHeight = window.innerHeight - containerRef.current.offsetTop - headerHeight - 50;
+        setContainerHeight(availableHeight);
+      }
+    };
+  
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, [isHeaderExpanded]);
 
   const handleContextMenuClick = (content: string) => {
     navigator.clipboard.writeText(content);
@@ -176,6 +194,7 @@ const JsonVisualizer: React.FC = () => {
 
       return (
         <div
+        key={item.path}
           className={classNames("json-row", {
             "json-row-expandable": item.isExpandable,
             "json-row-expanded": expandedPaths.has(item.path),
@@ -216,11 +235,11 @@ const JsonVisualizer: React.FC = () => {
   );
 
   return (
-    <div className="json-visualizer w-full h-full" ref={containerRef}>
+    <div className="json-visualizer w-full flex-1 flex flex-col" ref={containerRef}>
       <div className="header-section border-b mb-4">
         <div 
           className="flex items-center cursor-pointer p-2 hover:bg-gray-100"
-          onClick={toggleHeader}
+          onClick={() => toggleHeader()}
         >
           {isHeaderExpanded ? (
             <ChevronUpIcon className="w-5 h-5 mr-2" />
@@ -264,10 +283,10 @@ const JsonVisualizer: React.FC = () => {
       {error && <div className="error text-red-500 mb-4">{error}</div>}
 
       {jsonData && (
-        <div className="list-container w-full">
+        <div className="list-container w-full flex-1 overflow-x-hidden overflow-y-hidden">
           <List
             width={containerWidth || 100}
-            height={600}
+            height={containerHeight || 600}
             rowCount={filteredAndFlattenedData.length}
             rowHeight={30}
             rowRenderer={renderRow}
