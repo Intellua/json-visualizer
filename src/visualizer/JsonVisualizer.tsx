@@ -291,7 +291,7 @@ const JsonVisualizer: React.FC = () => {
     >
       <div className="header-section border-b mb-4">
         <div
-          className="flex items-center cursor-pointer p-2 hover:bg-gray-100"
+          className="flex items-center cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
           onClick={() => toggleHeader()}
         >
           {isHeaderExpanded ? (

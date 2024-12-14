@@ -15,6 +15,7 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  @apply dark:bg-gray-800 dark:border-gray-700;
 }
 
 .json-row {
@@ -23,10 +24,12 @@
   display: flex;
   align-items: center;
   border-bottom: 1px solid #eee;
+  @apply dark:border-gray-700;
 }
 
 .json-row:hover {
   background-color: #f5f5f5;
+  @apply dark:bg-gray-700;
 }
 
 .json-row-expandable {
@@ -45,11 +48,13 @@
 
 .json-key {
   color: #881391;
+  @apply dark:text-purple-500;
   margin-right: 5px;
 }
 
 .json-value {
   color: #1a1aa6;
+  @apply dark:text-blue-300;
 }
 
 .error {
@@ -83,6 +88,7 @@
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   padding: 4px 0;
+  @apply dark:bg-gray-800 dark:border-gray-700;
 }
 
 .context-menu-item {
@@ -93,6 +99,7 @@
 
 .context-menu-item:hover {
   background-color: #f0f0f0;
+  @apply dark:bg-gray-700;
 }
 
 .json-key, .json-value {
@@ -105,6 +112,7 @@
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   padding: 4px 0;
+  @apply dark:bg-gray-800 dark:border-gray-700;
 }
 
 .context-menu-item {
@@ -115,13 +123,19 @@
 
 .context-menu-item:hover {
   background-color: #f0f0f0;
+  @apply dark:bg-gray-700;
 }
 .header-section {
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  @apply dark:bg-gray-800 dark:border-gray-700;
 }
 
-.header-section:hover {
-  background-color: #f9fafb;
+.json-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  @apply dark:bg-gray-800 dark:border-gray-700;
 }
