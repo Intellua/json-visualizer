@@ -4,7 +4,7 @@ import { List, ListRowProps } from "react-virtualized";
 import classNames from "classnames";
 import { JsonNode } from "./types";
 import "./JsonVisualizer.css";
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid'; // 
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid"; //
 
 const JsonVisualizer: React.FC = () => {
   const [jsonData, setJsonData] = useState<any>(null);
@@ -16,6 +16,7 @@ const JsonVisualizer: React.FC = () => {
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const toggleHeader = (expanded?: boolean) => {
     setIsHeaderExpanded(expanded ?? !isHeaderExpanded);
@@ -51,13 +52,18 @@ const JsonVisualizer: React.FC = () => {
       if (containerRef.current) {
         setContainerWidth(containerRef.current.offsetWidth);
         // Calculate available height by subtracting header height from viewport height
-        const headerElement = containerRef.current.querySelector('.header-section');
+        const headerElement =
+          containerRef.current.querySelector(".header-section");
         const headerHeight = headerElement?.getBoundingClientRect().height || 0;
-        const availableHeight = window.innerHeight - containerRef.current.offsetTop - headerHeight - 50;
+        const availableHeight =
+          window.innerHeight -
+          containerRef.current.offsetTop -
+          headerHeight -
+          100;
         setContainerHeight(availableHeight);
       }
     };
-  
+
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
     return () => window.removeEventListener("resize", updateDimensions);
@@ -81,6 +87,12 @@ const JsonVisualizer: React.FC = () => {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
+  const setSearchFocus = () => {
+    setTimeout(() => {
+      searchRef.current?.focus();
+    }, 300);
+  };
+
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -94,6 +106,7 @@ const JsonVisualizer: React.FC = () => {
       setJsonInput(text);
       setError(null);
       toggleHeader(false);
+      setSearchFocus();
     } catch (err) {
       setError("Invalid JSON file");
       setJsonData(null);
@@ -112,6 +125,7 @@ const JsonVisualizer: React.FC = () => {
       setJsonData(parsed);
       setError(null);
       toggleHeader(false);
+      setSearchFocus();
     } catch (err) {
       setError("Invalid JSON format");
       setJsonData(null);
@@ -135,38 +149,74 @@ const JsonVisualizer: React.FC = () => {
       obj: any,
       path: string = "",
       result: JsonNode[] = [],
-      level: number = 0
+      level: number = 0,
+      relevantPaths: Set<string> = new Set()
     ): JsonNode[] => {
       if (typeof obj !== "object" || obj === null) {
-        result.push({ path, value: obj, level });
+        if (!searchTerm || relevantPaths.has(path)) {
+          result.push({ path, value: obj, level });
+        }
         return result;
       }
 
-      result.push({ path, value: obj, level, isExpandable: true });
+      // Only add this object node if it's relevant or we're not searching
+      if (!searchTerm || relevantPaths.has(path)) {
+        result.push({ path, value: obj, level, isExpandable: true });
+      }
 
-      if (expandedPaths.has(path)) {
+      if (expandedPaths.has(path) || !!searchTerm) {
         Object.entries(obj).forEach(([key, value]) => {
-          const newPath = path ? `$.${path}.${key}` : key;
-          flattenJSON(value, newPath, result, level + 1);
+          const newPath = path ? `${path}.${key}` : key;
+          // Only recurse if this path is relevant or we're not searching
+          if (!searchTerm || relevantPaths.has(newPath)) {
+            flattenJSON(value, newPath, result, level + 1, relevantPaths);
+          }
         });
       }
 
       return result;
     },
-    [expandedPaths]
+    [expandedPaths, searchTerm]
   );
 
   const filteredAndFlattenedData = useMemo(() => {
     if (!jsonData) return [];
 
-    const flattened = flattenJSON(jsonData);
-    if (!searchTerm) return flattened;
+    if (!searchTerm) {
+      return flattenJSON(jsonData);
+    }
 
-    return flattened.filter(
-      (item) =>
-        item.path.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        String(item.value).toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const regex = new RegExp(searchTerm, "img");
+
+    // First pass: find all matching paths and their parents
+    const relevantPaths = new Set<string>();
+
+    const findMatchingPaths = (obj: any, path: string = "") => {
+      // Check if current node matches
+      const matches = regex.test(path) || regex.test(String(obj));
+
+      if (matches) {
+        // Add this path and all its parent paths
+        let currentPath = "";
+        path.split(".").forEach((part) => {
+          currentPath = currentPath ? `${currentPath}.${part}` : part;
+          relevantPaths.add(currentPath);
+        });
+      }
+
+      // Recurse through object properties
+      if (typeof obj === "object" && obj !== null) {
+        Object.entries(obj).forEach(([key, value]) => {
+          const newPath = path ? `${path}.${key}` : key;
+          findMatchingPaths(value, newPath);
+        });
+      }
+    };
+
+    findMatchingPaths(jsonData);
+
+    // Second pass: flatten only the relevant paths
+    return flattenJSON(jsonData, "", [], 0, relevantPaths);
   }, [jsonData, flattenJSON, searchTerm]);
 
   const renderRow = useCallback(
@@ -194,7 +244,7 @@ const JsonVisualizer: React.FC = () => {
 
       return (
         <div
-        key={item.path}
+          key={item.path}
           className={classNames("json-row", {
             "json-row-expandable": item.isExpandable,
             "json-row-expanded": expandedPaths.has(item.path),
@@ -235,9 +285,12 @@ const JsonVisualizer: React.FC = () => {
   );
 
   return (
-    <div className="json-visualizer w-full flex-1 flex flex-col" ref={containerRef}>
+    <div
+      className="json-visualizer w-full flex-1 flex flex-col"
+      ref={containerRef}
+    >
       <div className="header-section border-b mb-4">
-        <div 
+        <div
           className="flex items-center cursor-pointer p-2 hover:bg-gray-100"
           onClick={() => toggleHeader()}
         >
@@ -248,7 +301,7 @@ const JsonVisualizer: React.FC = () => {
           )}
           <span className="font-medium">JSON Input Options</span>
         </div>
-        
+
         {/* Collapsible content */}
         {isHeaderExpanded && (
           <div className="toolbar flex flex-col gap-2 p-4">
@@ -257,25 +310,18 @@ const JsonVisualizer: React.FC = () => {
                 type="file"
                 accept=".json"
                 onChange={handleFileUpload}
-                className="file-input"
+                className="file-input max-h-10"
               />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input flex-1"
+              <textarea
+                placeholder="Or paste JSON here..."
+                value={jsonInput}
+                onChange={(e) => {
+                  setJsonInput(e.target.value);
+                  handleJsonInput(e.target.value);
+                }}
+                className="json-input w-full h-32 p-2 border rounded"
               />
             </div>
-            <textarea
-              placeholder="Or paste JSON here..."
-              value={jsonInput}
-              onChange={(e) => {
-                setJsonInput(e.target.value);
-                handleJsonInput(e.target.value);
-              }}
-              className="json-input w-full h-32 p-2 border rounded"
-            />
           </div>
         )}
       </div>
@@ -283,16 +329,28 @@ const JsonVisualizer: React.FC = () => {
       {error && <div className="error text-red-500 mb-4">{error}</div>}
 
       {jsonData && (
-        <div className="list-container w-full flex-1 overflow-x-hidden overflow-y-hidden">
-          <List
-            width={containerWidth || 100}
-            height={containerHeight || 600}
-            rowCount={filteredAndFlattenedData.length}
-            rowHeight={30}
-            rowRenderer={renderRow}
-            overscanRowCount={10}
-          />
-        </div>
+        <>
+          <div>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input flex-1 w-full mb-2"
+            />
+          </div>
+          <div className="list-container w-full flex-1 overflow-x-hidden overflow-y-hidden">
+            <List
+              width={containerWidth || 100}
+              height={containerHeight || 600}
+              rowCount={filteredAndFlattenedData.length}
+              rowHeight={30}
+              rowRenderer={renderRow}
+              overscanRowCount={10}
+            />
+          </div>
+        </>
       )}
 
       {/* Context Menu */}
