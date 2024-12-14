@@ -16,8 +16,8 @@ const JsonVisualizer: React.FC = () => {
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const toggleHeader = () => {
-    setIsHeaderExpanded(!isHeaderExpanded);
+  const toggleHeader = (expanded?: boolean) => {
+    setIsHeaderExpanded(expanded ?? !isHeaderExpanded);
   };
 
   const [contextMenu, setContextMenu] = useState<{
@@ -75,6 +75,7 @@ const JsonVisualizer: React.FC = () => {
       setJsonData(parsed);
       setJsonInput(text);
       setError(null);
+      toggleHeader(false);
     } catch (err) {
       setError("Invalid JSON file");
       setJsonData(null);
@@ -92,6 +93,7 @@ const JsonVisualizer: React.FC = () => {
       const parsed = JSON.parse(text);
       setJsonData(parsed);
       setError(null);
+      toggleHeader(false);
     } catch (err) {
       setError("Invalid JSON format");
       setJsonData(null);
