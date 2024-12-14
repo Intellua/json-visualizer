@@ -1,0 +1,122 @@
+/* src/components/JsonVisualizer.css */
+.json-visualizer {
+  padding: 20px;
+  font-family: monospace;
+}
+
+.toolbar {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.file-input,
+.search-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-input {
+  width: 200px;
+}
+
+.json-row {
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.json-row:hover {
+  background-color: #f5f5f5;
+}
+
+.json-row-expandable {
+  cursor: pointer;
+}
+
+.json-row-expandable::before {
+  content: '►';
+  margin-right: 5px;
+  font-size: 10px;
+}
+
+.json-row-expanded::before {
+  content: '▼';
+}
+
+.json-key {
+  color: #881391;
+  margin-right: 5px;
+}
+
+.json-value {
+  color: #1a1aa6;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.json-visualizer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.list-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+.json-row {
+  display: flex;
+  align-items: center;
+  padding-right: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-menu {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.context-menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.json-key, .json-value {
+  user-select: none;
+}
+
+.context-menu {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.context-menu-item:hover {
+  background-color: #f0f0f0;
+}
