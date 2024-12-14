@@ -120,7 +120,7 @@ const JsonVisualizer: React.FC = () => {
 
       if (expandedPaths.has(path)) {
         Object.entries(obj).forEach(([key, value]) => {
-          const newPath = path ? `${path}.${key}` : key;
+          const newPath = path ? `$.${path}.${key}` : key;
           flattenJSON(value, newPath, result, level + 1);
         });
       }
@@ -178,6 +178,7 @@ const JsonVisualizer: React.FC = () => {
           <span
             className="json-key"
             onContextMenu={(e) => handleContextMenu(e, "key", key, item.path)}
+            title={item.path}
           >
             {key}:
           </span>
