@@ -120,3 +120,12 @@
 .context-menu-item:hover {
   background-color: #f0f0f0;
 }
+.header-section {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-section:hover {
+  background-color: #f9fafb;
+}

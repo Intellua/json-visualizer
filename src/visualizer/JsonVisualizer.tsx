@@ -4,6 +4,7 @@ import { List, ListRowProps } from "react-virtualized";
 import classNames from "classnames";
 import { JsonNode } from "./types";
 import "./JsonVisualizer.css";
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid'; // 
 
 const JsonVisualizer: React.FC = () => {
   const [jsonData, setJsonData] = useState<any>(null);
@@ -12,7 +13,12 @@ const JsonVisualizer: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [jsonInput, setJsonInput] = useState<string>("");
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const toggleHeader = () => {
+    setIsHeaderExpanded(!isHeaderExpanded);
+  };
 
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -209,31 +215,48 @@ const JsonVisualizer: React.FC = () => {
 
   return (
     <div className="json-visualizer w-full h-full" ref={containerRef}>
-      <div className="toolbar flex flex-col gap-2 mb-4">
-        <div className="flex flex-row gap-2">
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleFileUpload}
-            className="file-input"
-          />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input flex-1"
-          />
+      <div className="header-section border-b mb-4">
+        <div 
+          className="flex items-center cursor-pointer p-2 hover:bg-gray-100"
+          onClick={toggleHeader}
+        >
+          {isHeaderExpanded ? (
+            <ChevronUpIcon className="w-5 h-5 mr-2" />
+          ) : (
+            <ChevronDownIcon className="w-5 h-5 mr-2" />
+          )}
+          <span className="font-medium">JSON Input Options</span>
         </div>
-        <textarea
-          placeholder="Or paste JSON here..."
-          value={jsonInput}
-          onChange={(e) => {
-            setJsonInput(e.target.value);
-            handleJsonInput(e.target.value);
-          }}
-          className="json-input w-full h-32 p-2 border rounded"
-        />
+        
+        {/* Collapsible content */}
+        {isHeaderExpanded && (
+          <div className="toolbar flex flex-col gap-2 p-4">
+            <div className="flex flex-row gap-2">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                className="file-input"
+              />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input flex-1"
+              />
+            </div>
+            <textarea
+              placeholder="Or paste JSON here..."
+              value={jsonInput}
+              onChange={(e) => {
+                setJsonInput(e.target.value);
+                handleJsonInput(e.target.value);
+              }}
+              className="json-input w-full h-32 p-2 border rounded"
+            />
+          </div>
+        )}
       </div>
 
       {error && <div className="error text-red-500 mb-4">{error}</div>}
