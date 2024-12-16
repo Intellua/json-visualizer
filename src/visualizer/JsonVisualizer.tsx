@@ -311,6 +311,7 @@ const JsonVisualizer: React.FC = () => {
                   File
                 </label>
                 <input
+                  id="file"
                   name="file"
                   type="file"
                   accept=".json"
