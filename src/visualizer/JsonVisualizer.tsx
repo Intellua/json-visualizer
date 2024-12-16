@@ -306,12 +306,18 @@ const JsonVisualizer: React.FC = () => {
         {isHeaderExpanded && (
           <div className="toolbar flex flex-col gap-2 p-4">
             <div className="flex flex-row gap-2">
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleFileUpload}
-                className="file-input max-h-10"
-              />
+              <div>
+                <label htmlFor="file" className="file-label">
+                  File
+                </label>
+                <input
+                  name="file"
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="file-input max-h-10"
+                />
+              </div>
               <textarea
                 placeholder="Or paste JSON here..."
                 value={jsonInput}
